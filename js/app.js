@@ -59,7 +59,7 @@ var SearchModel = function () {
             self.activeLocations(locations);
         } else {
             self.locations.forEach(function (location) {
-                if (location.name.indexOf(self.query()) >= 0) {
+                if (location.name.toLowerCase().indexOf(self.query().toLowerCase()) >= 0) {
                     self.activeLocations.push(location);
                 }
             });
@@ -74,6 +74,7 @@ var SearchModel = function () {
     this.showGallery = function (location) {
         Flickr.searchPhoto(location.name);
         mapController.animate(location.name);
+        mapController.openInfoWindow(location.name,location.additionalInfo);
     }
 };
 /**
@@ -102,6 +103,7 @@ MapController.prototype.initMarkers = function (locations) {
             map: self.map,
             title: location.name
         });
+        marker.setAnimation(null);
         marker.addListener('click', function () {
             self.toggleBounce(marker);
             if (infowindow) {
@@ -114,6 +116,29 @@ MapController.prototype.initMarkers = function (locations) {
         });
         self.markers.push(marker);
     });
+};
+
+/**
+ * Lets you open an infowindow on the marker specified by markerTitle
+ * @param markerTitle the title of the marker whose infowindow you want to open.
+ * @param info whatever you want to show in the infowindow
+ */
+MapController.prototype.openInfoWindow = function(markerTitle, info)
+{
+    var selectedMarker=null;
+    var content = info;
+    this.markers.forEach(function (marker) {
+        if (marker.title == markerTitle) {
+            selectedMarker = marker;
+        }
+    });
+    if (infowindow) {
+        infowindow.close();
+    }
+    infowindow = new google.maps.InfoWindow({
+        content: content
+    });
+    infowindow.open(this.map, selectedMarker);
 };
 /**
  * Toggles the bouncing animation in the marker
@@ -166,7 +191,7 @@ MapController.stopAnimation = function (marker) {
  * Animates a single marker.
  * @param markerTitle
  */
-MapController.animate = function (markerTitle) {
+MapController.prototype.animate = function (markerTitle) {
     this.markers.forEach(function (marker) {
         if (marker.title != markerTitle) {
             MapController.stopAnimation(marker);
@@ -187,6 +212,12 @@ ko.applyBindings(searchModel);
 function initMap() {
     mapController = new MapController();
     mapController.initMarkers(searchModel.activeLocations);
+}
+
+
+function mapsInitError()
+{
+    alert("Google maps could not be loaded. Please, check internet connection and try again later");
 }
 
 var Flickr = function () {
