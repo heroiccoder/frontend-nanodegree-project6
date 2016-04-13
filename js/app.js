@@ -105,14 +105,9 @@ MapController.prototype.initMarkers = function (locations) {
         });
         marker.setAnimation(null);
         marker.addListener('click', function () {
-            self.toggleBounce(marker);
-            if (infowindow) {
-                infowindow.close();
-            }
-            infowindow = new google.maps.InfoWindow({
-                content: location.additionalInfo
-            });
-            infowindow.open(self.map, marker);
+            Flickr.searchPhoto(location.name);
+            mapController.animate(location.name);
+            mapController.openInfoWindow(location.name,location.additionalInfo);
         });
         self.markers.push(marker);
     });
@@ -177,6 +172,12 @@ MapController.prototype.clearMarkers = function () {
  */
 MapController.animateMarker = function (marker) {
     marker.setAnimation(google.maps.Animation.BOUNCE);
+    var thisMarker = marker;
+    var self = this;
+    window.setTimeout(function()
+    {
+        self.stopAnimation(thisMarker);
+    }, 2000);
 };
 
 /**
