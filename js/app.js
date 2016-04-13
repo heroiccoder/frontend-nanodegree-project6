@@ -75,7 +75,7 @@ var SearchModel = function () {
         Flickr.searchPhoto(location.name);
         mapController.animate(location.name);
         mapController.openInfoWindow(location.name,location.additionalInfo);
-    }
+    };
 };
 /**
  * Controller to interact with google maps API
